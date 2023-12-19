@@ -4,6 +4,7 @@ export const AjaxComponent = () => {
 
     const [usuarios, setUsuarios] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [errores, setErrores] = useState("");
 
     //Genérico / Básico
     const getUsuariosEstaticos = () => {
@@ -49,13 +50,17 @@ export const AjaxComponent = () => {
     }
 
     const getUsuariosAjaxAW = () => {
-        setTimeout(async() => {
-            const peticion = await fetch("https://reqres.in/api/users?page=1");
-            const { data } = await peticion.json();
-            setUsuarios(data);
-            setCargando(false);
+        setTimeout(async () => {
+            try {
+                const peticion = await fetch("https://reqres.in/api/users?page=1");
+                const { data } = await peticion.json();
+                setUsuarios(data);
+                setCargando(false);
+            } catch (error) {
+                console.log(error.message);
+                setErrores(error.message);
+            }
         }, 2000);
-
     }
 
     useEffect(() => {
@@ -64,7 +69,16 @@ export const AjaxComponent = () => {
         getUsuariosAjaxAW();
     }, []);
 
-    if (cargando == true) {
+    if (errores !== ""){
+        //Cuando pasa algún errror
+        return (
+            <div className='errores'>
+                {errores}
+            </div>
+        )
+    }
+
+    else if (cargando == true) {
         //Cuando está todo cargando
         return (
             <div className='cargando'>
@@ -73,7 +87,7 @@ export const AjaxComponent = () => {
             </div>
         )
     }
-    else {
+    else if(cargando== false && errores === "") {
         // Cuando todo ha ido bien
         return (
             <div>
@@ -82,10 +96,10 @@ export const AjaxComponent = () => {
                     {
                         usuarios.map(usuario => {
                             console.log(usuario);
-                            return (<li key={usuario.id}> 
-                            <img src={usuario.avatar} width="20" />
-                            &nbsp;
-                            {usuario.first_name} {usuario.last_name}    
+                            return (<li key={usuario.id}>
+                                <img src={usuario.avatar} width="20" />
+                                &nbsp;
+                                {usuario.first_name} {usuario.last_name}
                             </li>);
                         })
                     }
